@@ -16,11 +16,11 @@ public class GarageEnvironment extends Environment {
         super.init(args);
 		try {
 			addPercept(ASSyntax.parseLiteral("percept(demo)"));
-			//Ezek nem jok vmiert
-			//addPercept("ag1", Literal.parseLiteral("p(a)"));
-			//addPercept("navigator", ASSyntax.parseLiteral("n(a)"));
-			//addPercept("surveillance", ASSyntax.parseLiteral("s(a)"));
-			//addPercept("valet", ASSyntax.parseLiteral("v(a)"));
+
+			addPercept("ag1", Literal.parseLiteral("p(a)"));
+			addPercept("navigator", ASSyntax.parseLiteral("n(a)"));
+			addPercept("surveillance", ASSyntax.parseLiteral("s(a)"));
+			addPercept("valet", ASSyntax.parseLiteral("v(a)"));
 		} catch (ParseException e) {
 			logger.warning("Parse exception caught.");
 		}
@@ -40,9 +40,9 @@ public class GarageEnvironment extends Environment {
     public void stop() {
 		//Clear all percepts
 		clearPercepts();
-		//clearPercepts(navigator);
-		//clearPercepts(surveillance);
-		//clearPercepts(valet);
+		clearPercepts("navigator");
+		clearPercepts("surveillance");
+		clearPercepts("valet");
 		
         super.stop();
     }

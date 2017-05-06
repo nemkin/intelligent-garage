@@ -5,7 +5,7 @@ import java.util.*;
 public class Navigator extends Agent {
 
  static Term idle = ASSyntax.createAtom("idle");
-	
+ 
  @Override
  public Intention selectIntention(Queue<Intention> intentions) {
    

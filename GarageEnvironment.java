@@ -31,15 +31,10 @@ public class GarageEnvironment extends Environment {
 		
 				
 			addPercept(ASSyntax.parseLiteral("percept(demo)"));
-			
-
-
-
 			addPercept("ag1", Literal.parseLiteral("p(a)"));
 			addPercept("navigator", ASSyntax.parseLiteral("n(a)"));
 			addPercept("surveillance", ASSyntax.parseLiteral("s(a)"));
 			addPercept("valet", ASSyntax.parseLiteral("v(a)"));
-
     }
 
 

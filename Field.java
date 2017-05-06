@@ -1,4 +1,4 @@
-public class Block {
+public class Field {
 
 	public enum Type {
 		Road,
@@ -10,9 +10,9 @@ public class Block {
 	public Type type;
 	
 	public Car car;
-	public Sring agent;
+	public String agent;
 	
 	public boolean obstacle() {
-		return (type == Wall || car!=null || agent!=null);
+		return (type == Type.Wall || car!=null || agent!=null);
 	}	
 }

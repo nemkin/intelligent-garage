@@ -12,6 +12,8 @@ public class GarageEnvironment extends Environment {
 
     private Logger logger = Logger.getLogger("Garage.mas2j."+GarageEnvironment.class.getName());
 
+    private Timer eventTimer;
+
     private String mapPath = "map.txt";
     private String carsPath = "cars.txt";
 
@@ -72,21 +74,61 @@ public class GarageEnvironment extends Environment {
         clearPercepts("valet");
     }
 
+    private void randomizeEvents() {
+
+        Random rand = new Random();
+
+        for(int i=0; i<mapx; ++i) {
+            for(int j=0; j<mapy; ++j) {
+
+                // Car can arrive here.
+                if(map[i][j].type == Field.Type.Gate && map[i][j].car==null) {
+                    if(rand.nextInt(100) < 50) {
+                        int index = rand.nextInt(cars.size());
+                        map[i][j].car = cars.get(index);
+                        cars.remove(index);
+                    } 
+                }
+
+                // Car can leave here.
+                if(map[i][j].type == Field.Type.ParkingSpot && map[i][j].car!=null) {
+                    if(rand.nextInt(100) < 50) {
+                        map[i][j].car.leaving = true;
+                    }
+                }
+            }
+        }
+    }
+
     private void updatePercepts() {
         try {
             for(int i=0; i<mapx; ++i) {
                 for(int j=0; j<mapy; ++j) {
-                    String percept;
-                    switch(map[i][j].type) {
-                        case Road: percept="road"; break;
-                        case Wall: percept="wall"; break; 
-                        case ParkingSpot: percept="parkingspot"; break;
-                        case Gate: percept="gate"; break;
-                        default: percept="none"; break;
+
+                    if(map[i][j].obstacle()) {
+                        addPercept("navigator", ASSyntax.parseLiteral("obstacle("+i+","+j+")"));
+                    } else {
+                        addPercept("navigator", ASSyntax.parseLiteral("~obstacle("+i+","+j+")"));
                     }
-                    addPercept("navigator", ASSyntax.parseLiteral(""+percept+"("+i+","+j+")"));
+
+                    if(map[i][j].type == Field.Type.ParkingSpot) {
+                        addPercept("surveillance", ASSyntax.parseLiteral("parkingspot("+i+","+j+")"));
+                    }
+
+                    if(map[i][j].type == Field.Type.Gate) {
+                        addPercept("surveillance", ASSyntax.parseLiteral("gate("+i+","+j+")"));
+                        if(map[i][j].car != null) {
+                            addPercept("surveillance", ASSyntax.parseLiteral("carArrived("+i+","+j+")"));
+                        }
+                    }
+
+                    if(map[i][j].car != null && map[i][j].car.leaving) {
+                        addPercept("surveillance", ASSyntax.parseLiteral("carLeaving("+i+","+j+")"));
+                    } 
+
                 }
             }
+
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -97,6 +139,9 @@ public class GarageEnvironment extends Environment {
             super.init(args);
             deletePercepts();
             updatePercepts();
+
+            eventTimer = new Timer();
+            //eventTimer.schedule(this, 0, 5000);
         }
 
     @Override

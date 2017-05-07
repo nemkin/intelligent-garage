@@ -120,15 +120,19 @@ public class GarageEnvironment extends Environment {
                 }
             }
         }
-        
+
         updatePercepts();
     }
 
     private void updatePercepts() {
 
-         deletePercepts();
+        deletePercepts();
 
-         try {
+
+        try {
+
+            addPercept("navigator", ASSyntax.parseLiteral("dimension("+mapx+","+mapy+")"));
+
             for(int i=0; i<mapx; ++i) {
                 for(int j=0; j<mapy; ++j) {
 

@@ -1,6 +1,7 @@
 import jason.asSyntax.*;
 import jason.architecture.*;
 import java.util.*;
+import java.lang.Math;
 
 public class NavigatorArchitecture extends AgArch {
 
@@ -65,5 +66,99 @@ public class NavigatorArchitecture extends AgArch {
             }
             System.out.println("");
         }
+    }
+
+    private void astar(int startx, int starty, int endx, int endy) {
+
+        //Distance array for Dijkstra's algorithm
+        int[][] g = new int[mapx][mapy];
+        for(int i=0; i<mapx; ++i) {
+            for(int j=0; j<mapy; ++j) {
+                g[i][j] = mapx*mapy;
+            }
+        }
+        g[startx][starty] = 0; 
+
+        //Added heuristics to array g for A*
+        int[][] f = new int[mapx][mapy];
+        for(int i=0; i<mapx; ++i) {
+            for(int j=0; j<mapy; ++j) {
+                f[i][j] = g[i][j] + manhattan(i,j,endx,endy);
+            }
+        }
+
+        Coord[][] cameFrom = new Coord[mapx][mapy];
+
+        //Nodes that have been expanded from and closed in Dijsktra's algorithm 
+        boolean[][] closed = new boolean[mapx][mapy];
+        for(int i=0; i<mapx; ++i) {
+            for(int j=0; j<mapy; ++j) {
+                closed[i][j] = false;
+            }
+        }
+
+        Coord curr = new Coord(startx, starty);
+
+        while(curr.x!=endx || curr.y!=endy) {
+            closed[curr.x][curr.y] = true; 
+
+            Coord left = new Coord(curr.x, curr.y-1); 
+            if(steppable(left)) {
+                if(g[curr.x][curr.y] + 1 < g[left.x][left.y]) {
+                    g[left.x][left.y] = g[curr.x][curr.y] + 1;
+                    f[left.x][left.y] = g[left.x][left.y] + manhattan(left.x, left.y, endx, endy);
+                }
+            }
+
+            Coord right = new Coord(curr.x, curr.y+1);
+            if(steppable(right)) {
+                if(g[curr.x][curr.y] + 1 < g[right.x][right.y]) {
+                    g[right.x][right.y] = g[curr.x][curr.y] + 1;
+                    f[right.x][right.y] = g[right.x][right.y] + manhattan(right.x, right.y, endx, endy);
+                }
+            } 
+
+            Coord up = new Coord(curr.x-1, curr.y);
+            if(steppable(up)) {
+                if(g[curr.x][curr.y] + 1 < g[up.x][up.y]) {
+                    g[up.x][up.y] = g[curr.x][curr.y] + 1;
+                    f[up.x][up.y] = g[up.x][up.y] + manhattan(up.x, up.y, endx, endy);
+                }
+            }
+
+            Coord down = new Coord(curr.x+1, curr.y);
+            if(steppable(down)) {
+                if(g[curr.x][curr.y] + 1 < g[down.x][down.y]) {
+                    g[down.x][down.y] = g[curr.x][curr.y] + 1;
+                    f[down.x][down.y] = g[down.x][down.y] + manhattan(down.x, down.y, endx, endy);
+                }
+            }
+
+           Coord from = curr;
+           
+           int minf = -1;
+           for(int i=0; i<mapx; ++i) {
+                for(int j=0; j<mapy; ++j) {
+                   if(map[i][j] && !closed[i][j]) {
+                        if(minf == -1 || f[i][j] < minf) {
+                            curr = new Coord(i,j); 
+                        }
+                   } 
+                }
+           } 
+           
+           if(minf == -1) break;
+           
+           cameFrom[curr.x][curr.y] = from;
+ 
+        }
+    }
+
+    private int manhattan(int fromx, int fromy, int tox, int toy) {
+        return Math.abs(tox-fromx + toy-fromy);
+    }
+
+    private boolean steppable(Coord c) {
+        return (0<=c.x && c.x<mapx && 0<=c.y && c.y<mapy && map[c.x][c.y]);
     }
 }

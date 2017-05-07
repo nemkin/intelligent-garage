@@ -13,8 +13,8 @@
 +!callValet(X,Y,U,V) : true <- .print("surv calling valet with destination koords");
 							   .send(valet,achieve,goOnPosition(X,Y,U,V)).
 
-+parkingspot(X,Y) : true <- .print("parkingspot: ",X,",",Y).
 +gate(X,Y) : true <- .print("gate: ",X,",",Y).
 +carArrived(X,Y) : true <- .print("carArrived: ",X,",",Y);
 							!callValet(X,Y,U,V).
-+carLeaving(X,Y) : true <- .print("carArrived: ",X,",",Y).
++parkingspot(X,Y) : true <- .print("parkingspot: ",X,",",Y).
++carLeaving(X,Y) : true <- .print("carLeaving: ",X,",",Y).

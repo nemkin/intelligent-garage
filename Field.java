@@ -13,6 +13,6 @@ public class Field {
 	public String agent;
 	
 	public boolean obstacle() {
-		return (type == Type.Wall || car!=null || agent!=null);
+		return (type == Type.Road && car==null && agent==null);
 	}	
 }

@@ -13,6 +13,20 @@ public class GarageEnvironment extends Environment {
     private Logger logger = Logger.getLogger("Garage.mas2j."+GarageEnvironment.class.getName());
 
     private Timer eventTimer;
+    public class EventTimer extends TimerTask {
+
+        private GarageEnvironment env;
+
+        public EventTimer(GarageEnvironment env) {
+            super();
+            this.env = env;
+        }
+
+        @Override
+            public void run() {
+                env.randomizeEvents();
+            }
+    }
 
     private String mapPath = "map.txt";
     private String carsPath = "cars.txt";
@@ -67,14 +81,22 @@ public class GarageEnvironment extends Environment {
         }
     }
 
-    private void deletePercepts() {
-        clearPercepts();
-        clearPercepts("navigator");
-        clearPercepts("surveillance");
-        clearPercepts("valet");
-    }
+    @Override
+        public void init(String[] args) {
+            super.init(args);
+            updatePercepts();
 
-    private void randomizeEvents() {
+            eventTimer = new Timer();
+            eventTimer.schedule(new EventTimer(this), 0, 500);
+        }
+
+    @Override
+        public void stop() {
+            deletePercepts();
+            super.stop();
+        }
+
+    public void randomizeEvents() {
 
         Random rand = new Random();
 
@@ -91,17 +113,26 @@ public class GarageEnvironment extends Environment {
                 }
 
                 // Car can leave here.
-                if(map[i][j].type == Field.Type.ParkingSpot && map[i][j].car!=null) {
+                if(map[i][j].type == Field.Type.ParkingSpot && map[i][j].car!=null && map[i][j].car.leaving==false) {
                     if(rand.nextInt(100) < 50) {
                         map[i][j].car.leaving = true;
                     }
                 }
             }
         }
+
+        updatePercepts();
     }
 
     private void updatePercepts() {
+
+        deletePercepts();
+
+
         try {
+
+            addPercept("navigator", ASSyntax.parseLiteral("dimension("+mapx+","+mapy+")"));
+
             for(int i=0; i<mapx; ++i) {
                 for(int j=0; j<mapy; ++j) {
 
@@ -134,15 +165,13 @@ public class GarageEnvironment extends Environment {
         }
     } 
 
-    @Override
-        public void init(String[] args) {
-            super.init(args);
-            deletePercepts();
-            updatePercepts();
+    private void deletePercepts() {
+        clearPercepts();
+        clearPercepts("navigator");
+        clearPercepts("surveillance");
+        clearPercepts("valet");
+    }
 
-            eventTimer = new Timer();
-            //eventTimer.schedule(this, 0, 5000);
-        }
 
     @Override
         public boolean executeAction(String agName, Structure action) {
@@ -153,11 +182,7 @@ public class GarageEnvironment extends Environment {
             return true; // the action was executed with success 
         }
 
-    @Override
-        public void stop() {
-            deletePercepts();
-            super.stop();
-        }
+
 
 }
 

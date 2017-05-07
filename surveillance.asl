@@ -10,6 +10,8 @@
 
 +!start : true <- .print("hello world.").
 
-+parkingspot(X,Y) : true <- .print("parkingspot: ",X,",",Y).
 +gate(X,Y) : true <- .print("gate: ",X,",",Y).
++parkingspot(X,Y) : true <- .print("parkingspot: ",X,",",Y).
 +carArrived(X,Y) : true <- .print("carArrived: ",X,",",Y).
++carLeaving(X,Y) : true <- .print("carLeaving: ",X,",",Y).
+

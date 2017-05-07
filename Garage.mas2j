@@ -9,6 +9,6 @@ MAS garage {
     agents:
         navigator agentArchClass NavigatorArchitecture agentClass Navigator;
         surveillance agentArchClass SurveillanceArchitecture agentClass Surveillance;
-        valet agentArchClass ValetArchitecture agentClass Valet #10;
+        valet agentArchClass ValetArchitecture agentClass Valet;
 }
 

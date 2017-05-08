@@ -34,9 +34,9 @@
 .print("emptyparkingspot ",X,",",Y).
 
 
-+carArrived(X,Y) : emptyParkingSpot(U,V)
++carArrived(X,Y) : emptyparkingspot(U,V)
 <-
-.print("carArrived ",X,",",Y);
+.print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!carArrived ",X,",",Y);
 !callValet(X,Y,U,V).
 
 

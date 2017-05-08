@@ -2,6 +2,8 @@ import jason.asSyntax.*;
 import jason.architecture.*;
 import java.util.*;
 import java.lang.Math;
+import jason.asSemantics.Message;
+import java.util.regex.*;
 
 public class NavigatorArchitecture extends AgArch {
 
@@ -25,9 +27,10 @@ public class NavigatorArchitecture extends AgArch {
 
     private void parsePercepts(Collection<Literal> perceptCollection) {
 
-        cleanPercepts();
 
         if(perceptCollection == null) return; 
+
+        cleanPercepts();
 
         //Transforming Objects back to Literals and those back to Strings.
         Object[] perceptObjs = perceptCollection.toArray();
@@ -52,7 +55,7 @@ public class NavigatorArchitecture extends AgArch {
             if(percepts[i].charAt(0) == 'd') continue;
             String[] result = percepts[i].split("obstacle");
             Coord coord = new Coord(result[1]);
-            map[coord.x][coord.y] = !(result[0].equals("~"));
+            map[coord.x][coord.y] = result[0].equals("~");
         }
 
     }
@@ -68,13 +71,17 @@ public class NavigatorArchitecture extends AgArch {
         }
     }
 
-    private void astar(int startx, int starty, int endx, int endy) {
+    private List<String> astar(int startx, int starty, int endx, int endy) {
+
+        System.out.println("A* for: "+startx+" "+starty+" "+endx+" "+endy+" "+mapx+" "+mapy);
+
+        if(map==null) return null;
 
         //Distance array for Dijkstra's algorithm
         int[][] g = new int[mapx][mapy];
         for(int i=0; i<mapx; ++i) {
             for(int j=0; j<mapy; ++j) {
-                g[i][j] = mapx*mapy;
+                g[i][j] = -1;
             }
         }
         g[startx][starty] = 0; 
@@ -83,7 +90,7 @@ public class NavigatorArchitecture extends AgArch {
         int[][] f = new int[mapx][mapy];
         for(int i=0; i<mapx; ++i) {
             for(int j=0; j<mapy; ++j) {
-                f[i][j] = g[i][j] + manhattan(i,j,endx,endy);
+                f[i][j] = (g[i][j] == -1) ? -1 : g[i][j] + manhattan(i,j,endx,endy);
             }
         }
 
@@ -98,60 +105,105 @@ public class NavigatorArchitecture extends AgArch {
         }
 
         Coord curr = new Coord(startx, starty);
+        Coord from;
 
         while(curr.x!=endx || curr.y!=endy) {
             closed[curr.x][curr.y] = true; 
 
             Coord left = new Coord(curr.x, curr.y-1); 
-            if(steppable(left)) {
-                if(g[curr.x][curr.y] + 1 < g[left.x][left.y]) {
+            if(steppable(left) || (left.x == endx && left.y == endy) ) {
+                if(g[curr.x][curr.y] + 1 < g[left.x][left.y] || g[left.x][left.y] == -1) {
                     g[left.x][left.y] = g[curr.x][curr.y] + 1;
                     f[left.x][left.y] = g[left.x][left.y] + manhattan(left.x, left.y, endx, endy);
                 }
             }
 
             Coord right = new Coord(curr.x, curr.y+1);
-            if(steppable(right)) {
-                if(g[curr.x][curr.y] + 1 < g[right.x][right.y]) {
+            if(steppable(right) || (right.x == endx && right.y == endy)) {
+                if(g[curr.x][curr.y] + 1 < g[right.x][right.y] || g[right.x][right.y] == -1) {
                     g[right.x][right.y] = g[curr.x][curr.y] + 1;
                     f[right.x][right.y] = g[right.x][right.y] + manhattan(right.x, right.y, endx, endy);
                 }
             } 
 
             Coord up = new Coord(curr.x-1, curr.y);
-            if(steppable(up)) {
-                if(g[curr.x][curr.y] + 1 < g[up.x][up.y]) {
+            if(steppable(up) || (up.x == endx && up.y == endy)) {
+                if(g[curr.x][curr.y] + 1 < g[up.x][up.y] || g[up.x][up.y] == -1) {
                     g[up.x][up.y] = g[curr.x][curr.y] + 1;
                     f[up.x][up.y] = g[up.x][up.y] + manhattan(up.x, up.y, endx, endy);
                 }
             }
 
             Coord down = new Coord(curr.x+1, curr.y);
-            if(steppable(down)) {
-                if(g[curr.x][curr.y] + 1 < g[down.x][down.y]) {
+            if(steppable(down) || (down.x == endx && down.y == endy)) {
+                if(g[curr.x][curr.y] + 1 < g[down.x][down.y] || g[down.x][down.y] == -1) {
                     g[down.x][down.y] = g[curr.x][curr.y] + 1;
                     f[down.x][down.y] = g[down.x][down.y] + manhattan(down.x, down.y, endx, endy);
                 }
             }
 
-           Coord from = curr;
-           
-           int minf = -1;
-           for(int i=0; i<mapx; ++i) {
+            from = curr;
+
+            int minf = -1;
+            for(int i=0; i<mapx; ++i) {
                 for(int j=0; j<mapy; ++j) {
-                   if(map[i][j] && !closed[i][j]) {
+                    if( ((map[i][j]) || ((i==endx) && (j==endy))) && !(closed[i][j]) && (f[i][j] != -1)) {
                         if(minf == -1 || f[i][j] < minf) {
+                            minf = f[i][j];
                             curr = new Coord(i,j); 
                         }
-                   } 
+                    } 
                 }
-           } 
-           
-           if(minf == -1) break;
-           
-           cameFrom[curr.x][curr.y] = from;
- 
+            } 
+
+            if(minf == -1) {
+                    break;
+            }
+
+            cameFrom[curr.x][curr.y] = from;
+
         }
+
+        if(cameFrom[endx][endy] == null) {
+            System.out.println("Did not find path.");
+            return null;
+        }
+
+        List path = new ArrayList<String>();
+
+        curr = new Coord(endx,endy);
+
+        while(curr.x != startx && curr.x != starty) {
+            from = cameFrom[curr.x][curr.y];
+
+            //Left
+            if(from.y - 1 == curr.y) {
+                path.add("L");
+            }
+
+            //Right
+            if(from.y + 1 == curr.y) {
+                path.add("R");
+            }
+
+            //Up
+            if(from.x - 1 == curr.x) {
+                path.add("U");
+            }
+
+            //Down
+            if(from.x + 1 == curr.x) {
+                path.add("D");
+            }
+
+            curr = from;
+        }
+
+        Collections.reverse(path);
+
+        System.out.println("A* result: From:"+startx+","+starty+" To: "+endx+","+endy+"Path:"+path);
+        
+        return path;
     }
 
     private int manhattan(int fromx, int fromy, int tox, int toy) {
@@ -161,4 +213,43 @@ public class NavigatorArchitecture extends AgArch {
     private boolean steppable(Coord c) {
         return (0<=c.x && c.x<mapx && 0<=c.y && c.y<mapy && map[c.x][c.y]);
     }
+
+    @Override
+        public void checkMail() {
+            super.checkMail();
+
+            Iterator im = getTS().getC().getMailBox().iterator();
+            while (im.hasNext()) {
+                Message m = (Message) im.next();
+                if (m.getSender().equals("valet")) {
+                    System.out.println("navigator valet message: "+m.toString()+" "+m.getPropCont());
+                
+                    String route = m.getPropCont().toString();
+                    
+                    System.out.println(route);
+
+                    Matcher mr = Pattern.compile("route\\(([0-9]*),([0-9]*),([0-9]*),([0-9]*)\\)").matcher(route);
+                    mr.find();
+
+                    List<String> path = astar(Integer.parseInt(mr.group(1)),
+                                              Integer.parseInt(mr.group(2)),
+                                              Integer.parseInt(mr.group(3)),
+                                              Integer.parseInt(mr.group(4)));
+                    String result = "["+String.join(",", path)+"]"; 
+                    Message r = new Message(
+                            "tell",
+                            getAgName(),
+                            m.getSender(),
+                            "msg("+result+")"
+                            );
+                    
+                    try {
+                        sendMsg(r);
+                    } catch (Exception e) {
+                        e.printStackTrace(); //TODO
+                    }
+                    im.remove(); //Feldolgoztuk
+                }
+            }
+        }
 }

@@ -115,8 +115,9 @@ loop: for(int i=0; i<mapx; ++i) {
             for(int j=0; j<mapy; ++j) {
 
                 // Car can arrive here.
-                if(map[i][j].type == Field.Type.Gate && map[i][j].car==null) {
-                    if(rand.nextInt(100) < 50) {
+                if((i==2 && j==1 && map[i][j].car==null) || (map[i][j].type == Field.Type.Gate && map[i][j].car==null)) {
+                    if(rand.nextInt(100) < 250) {
+                        System.out.println("Added car at "+i+","+j);
                         int index = rand.nextInt(cars.size());
                         map[i][j].car = cars.get(index);
                         cars.remove(index);
@@ -153,20 +154,21 @@ loop: for(int i=0; i<mapx; ++i) {
                         addPercept("navigator", ASSyntax.parseLiteral("~obstacle("+i+","+j+")"));
                     }
 
-                    if(map[i][j].type == Field.Type.ParkingSpot) {
-                        addPercept("surveillance", ASSyntax.parseLiteral("parkingspot("+i+","+j+")"));
+                    if(map[i][j].type == Field.Type.ParkingSpot && map[i][j].car!=null) {
+                        addPercept("surveillance", ASSyntax.parseLiteral("takenparkingspot("+i+","+j+")"));
                     }
 
                     if(map[i][j].type == Field.Type.ParkingSpot && map[i][j].car == null) {
-                        addPercept("surveillance", ASSyntax.parseLiteral("takenparkingspot("+i+","+j+")"));
+                        addPercept("surveillance", ASSyntax.parseLiteral("emptyparkingspot("+i+","+j+")"));
                     }
 
                     if(map[i][j].type == Field.Type.Gate) {
                         addPercept("surveillance", ASSyntax.parseLiteral("gate("+i+","+j+")"));
                     }
 
-                    if(map[i][j].type == Field.Type.Gate && map[i][j].car != null) {
+                    if(/*map[i][j].type == Field.Type.Gate &&*/ map[i][j].car != null) {
                         addPercept("surveillance", ASSyntax.parseLiteral("carArrived("+i+","+j+")"));
+                        System.out.println("environment: !!!!!!!!!!!!!!!!!!!!! Added car here: "+i+" "+j);
                     }
 
                     if(map[i][j].car != null && map[i][j].car.leaving) {

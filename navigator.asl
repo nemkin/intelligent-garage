@@ -8,8 +8,21 @@
 
 /* Plans */
 
-+!start : true <- .print("hello world.").
-+!calculateRoute(X,Y,U,V) : true <- .print("calculating route from ",X,",",Y," to ",U,",",V).
++!start : true
+<-
+.print("hello world").
 
-+obstacle(X,Y) : true <- .print("obstacle: ",X,",",Y).
-+~obstacle(X,Y) : true <- .print("walkable: ",X,",",Y).
+
++!calculateRoute(X,Y,U,V) : true
+<-
+.print("calculating route from ",X,",",Y," to ",U,",",V).
+
+
++obstacle(X,Y) : true
+<-
+.print("obstacle: ",X,",",Y).
+
+
++~obstacle(X,Y) : true
+<-
+.print("walkable: ",X,",",Y).

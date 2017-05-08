@@ -8,13 +8,38 @@
 
 /* Plans */
 
-+!start : true <- .print("hello world.");
-				  +carArrived(99,99).
-+!callValet(X,Y,U,V) : true <- .print("surv calling valet with destination koords");
-							   .send(valet,achieve,goOnPosition(X,Y,U,V)).
++!start : true 
+<-
+.print("hello world").
 
-+gate(X,Y) : true <- .print("gate: ",X,",",Y).
-+carArrived(X,Y) : true <- .print("carArrived: ",X,",",Y);
-							!callValet(X,Y,U,V).
-+parkingspot(X,Y) : true <- .print("parkingspot: ",X,",",Y).
-+carLeaving(X,Y) : true <- .print("carLeaving: ",X,",",Y).
+
++!callValet(X,Y,U,V) : true 
+<- 
+.print("calling valet to go from (",X,",",Y,") to (",U,",",V,")");
+.send(valet,achieve,goOnPosition(X,Y,U,V)).
+
+
++gate(X,Y) : true
+<-
+.print("gate: ",X,",",Y).
+
+
++takenparkingspot(X,Y) : true
+<-
+.print("takenparkingspot ",X,",",Y).
+
+
++emptyparkingspot(X,Y) : true
+<-
+.print("emptyparkingspot ",X,",",Y).
+
+
++carArrived(X,Y) : emptyParkingSpot(U,V)
+<-
+.print("carArrived ",X,",",Y);
+!callValet(X,Y,U,V).
+
+
++carLeaving(X,Y) : true
+<-
+.print("carLeaving ",X,",",Y).

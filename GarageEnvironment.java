@@ -76,6 +76,17 @@ public class GarageEnvironment extends Environment {
                 cars.add(car);
             }
 
+
+            // Placing valet
+loop: for(int i=0; i<mapx; ++i) {
+          for(int j=0; j<mapy; ++j) {
+              if(map[i][j].type == Field.Type.Gate) {
+                  map[i][j].agent = "valet";
+                  break loop;
+              }
+          }
+      }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -146,16 +157,26 @@ public class GarageEnvironment extends Environment {
                         addPercept("surveillance", ASSyntax.parseLiteral("parkingspot("+i+","+j+")"));
                     }
 
+                    if(map[i][j].type == Field.Type.ParkingSpot && map[i][j].car == null) {
+                        addPercept("surveillance", ASSyntax.parseLiteral("takenparkingspot("+i+","+j+")"));
+                    }
+
                     if(map[i][j].type == Field.Type.Gate) {
                         addPercept("surveillance", ASSyntax.parseLiteral("gate("+i+","+j+")"));
-                        if(map[i][j].car != null) {
-                            addPercept("surveillance", ASSyntax.parseLiteral("carArrived("+i+","+j+")"));
-                        }
+                    }
+
+                    if(map[i][j].type == Field.Type.Gate && map[i][j].car != null) {
+                        addPercept("surveillance", ASSyntax.parseLiteral("carArrived("+i+","+j+")"));
                     }
 
                     if(map[i][j].car != null && map[i][j].car.leaving) {
                         addPercept("surveillance", ASSyntax.parseLiteral("carLeaving("+i+","+j+")"));
-                    } 
+                    }
+
+                    if(map[i][j].agent != null && map[i][j].agent.equals("valet")) {
+                        addPercept("valet", ASSyntax.parseLiteral("position("+i+","+j+")"));
+                        System.out.println("environment: valet position "+i+" "+j);
+                    }
 
                 }
             }
@@ -175,15 +196,49 @@ public class GarageEnvironment extends Environment {
 
     @Override
         public boolean executeAction(String agName, Structure action) {
-            logger.info("executing: "+action+", but not implemented!");
-            if (true) { // you may improve this condition
-                informAgsEnvironmentChanged();
+            System.out.println("environment: action: " + agName + " " +action);
+            if(agName.equals("valet")) {
+                Coord valetpos = findValet();
+                Coord valetnewpos;
+                switch(action.toString()) {
+                    case "left": valetnewpos = new Coord(valetpos.x, valetpos.y-1); break;
+                    case "right": valetnewpos = new Coord(valetpos.x, valetpos.y+1); break;
+                    case "up": valetnewpos = new Coord(valetpos.x-1, valetpos.y); break;
+                    case "down": valetnewpos = new Coord(valetpos.x+1, valetpos.y); break;
+                    default: valetnewpos = valetpos;
+                }
+
+                System.out.println("environment: valetnewpos: "+valetnewpos.x+" "+valetnewpos.y); 
+            
+                if(steppable(valetnewpos)) {
+                    map[valetpos.x][valetpos.y].agent = null;
+                    map[valetnewpos.x][valetnewpos.y].agent = "valet";
+                    updatePercepts();
+                    System.out.println("environment: successful valet move");
+                    //informAgsEnvironmentChanged();
+                    return true;
+                } else {
+                    return false;
+                }
             }
-            return true; // the action was executed with success 
+            return false;
         }
 
+    private Coord findValet() {
+        for(int i=0; i<mapx; ++i) {
+            for(int j=0; j<mapy; ++j) {
+                if(map[i][j].agent!=null && map[i][j].agent.equals("valet")) {
+                    return new Coord(i,j);
+                }
+            }
+        }
+        return new Coord(-1,-1);
+    }
 
-
+    private boolean steppable(Coord c) {
+      System.out.println("Steppable? :"+c.x+" "+c.y+" "+map[c.x][c.y].agent+" "+map[c.x][c.y].car+" "+map[c.x][c.y].obstacle()+" "+map[c.x][c.y].type);  
+      return (0<=c.x && c.x<mapx && 0<=c.y && c.y<mapy && !(map[c.x][c.y].obstacle()));
+    }
 }
 
 

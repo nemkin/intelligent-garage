@@ -29,14 +29,14 @@
 .print("takenparkingspot ",X,",",Y).
 
 
-+emptyparkingspot(X,Y) : true
-<-
-.print("emptyparkingspot ",X,",",Y).
+//+emptyparkingspot(X,Y) : true
+//<-
+//.print("emptyparkingspot ",X,",",Y).
 
 
 +carArrived(X,Y) : emptyparkingspot(U,V)
 <-
-.print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!carArrived ",X,",",Y);
+.print("carArrived ",X,",",Y);
 !callValet(X,Y,U,V).
 
 

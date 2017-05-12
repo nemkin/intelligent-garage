@@ -117,7 +117,6 @@ loop: for(int i=0; i<mapx; ++i) {
                 // Car can arrive here.
                 if((i==2 && j==1 && map[i][j].car==null) || (map[i][j].type == Field.Type.Gate && map[i][j].car==null)) {
                     if(rand.nextInt(100) < 250) {
-                        System.out.println("Added car at "+i+","+j);
                         int index = rand.nextInt(cars.size());
                         map[i][j].car = cars.get(index);
                         cars.remove(index);
@@ -166,9 +165,8 @@ loop: for(int i=0; i<mapx; ++i) {
                         addPercept("surveillance", ASSyntax.parseLiteral("gate("+i+","+j+")"));
                     }
 
-                    if(/*map[i][j].type == Field.Type.Gate &&*/ map[i][j].car != null) {
+                    if(map[i][j].type == Field.Type.Gate && map[i][j].car != null) {
                         addPercept("surveillance", ASSyntax.parseLiteral("carArrived("+i+","+j+")"));
-                        System.out.println("environment: !!!!!!!!!!!!!!!!!!!!! Added car here: "+i+" "+j);
                     }
 
                     if(map[i][j].car != null && map[i][j].car.leaving) {
@@ -177,7 +175,6 @@ loop: for(int i=0; i<mapx; ++i) {
 
                     if(map[i][j].agent != null && map[i][j].agent.equals("valet")) {
                         addPercept("valet", ASSyntax.parseLiteral("position("+i+","+j+")"));
-                        System.out.println("environment: valet position "+i+" "+j);
                     }
 
                 }
@@ -198,8 +195,8 @@ loop: for(int i=0; i<mapx; ++i) {
 
     @Override
         public boolean executeAction(String agName, Structure action) {
-            System.out.println("environment: action: " + agName + " " +action);
-            if(agName.equals("valet")) {
+            if(agName.equals("valet") && (action.equals("up") || action.equals("down") || action.equals("left") || action.equals("right"))) {
+                System.out.println("Action! " + agName + " " +action);
                 Coord valetpos = findValet();
                 Coord valetnewpos;
                 switch(action.toString()) {
@@ -210,13 +207,10 @@ loop: for(int i=0; i<mapx; ++i) {
                     default: valetnewpos = valetpos;
                 }
 
-                System.out.println("environment: valetnewpos: "+valetnewpos.x+" "+valetnewpos.y); 
-            
                 if(steppable(valetnewpos)) {
                     map[valetpos.x][valetpos.y].agent = null;
                     map[valetnewpos.x][valetnewpos.y].agent = "valet";
                     updatePercepts();
-                    System.out.println("environment: successful valet move");
                     //informAgsEnvironmentChanged();
                     return true;
                 } else {
@@ -238,7 +232,6 @@ loop: for(int i=0; i<mapx; ++i) {
     }
 
     private boolean steppable(Coord c) {
-      System.out.println("Steppable? :"+c.x+" "+c.y+" "+map[c.x][c.y].agent+" "+map[c.x][c.y].car+" "+map[c.x][c.y].obstacle()+" "+map[c.x][c.y].type);  
       return (0<=c.x && c.x<mapx && 0<=c.y && c.y<mapy && !(map[c.x][c.y].obstacle()));
     }
 }

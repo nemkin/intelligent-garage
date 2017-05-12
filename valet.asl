@@ -10,11 +10,7 @@
 
 +!start : true
 <-
-.print("hello world");
-up;
-up;
-left;
-left.
+.print("hello world").
 
 +position(A,B) : true
 <-
@@ -31,4 +27,12 @@ left.
 !getRoute(A,B,X,Y);
 !getRoute(X,Y,U,V).
 
-+msg(X)[source(A)]:.print("Received this msg:",X," From: ",A).
++msg(X)[source(A)] : X\==[]
+<-
+!route(X).
+
++!route([H|T]): H == "U" <- up; !route(T). 
++!route([H|T]): H == "D" <- down; !route(T). 
++!route([H|T]): H == "L" <- left; !route(T). 
++!route([H|T]): H == "R" <- right; !route(T).
++!route([H|T]): true <- print("Cant do ", H); !route(T).

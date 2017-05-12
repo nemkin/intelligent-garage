@@ -73,7 +73,7 @@ public class NavigatorArchitecture extends AgArch {
 
     private List<String> astar(int startx, int starty, int endx, int endy) {
 
-        System.out.println("A* for: "+startx+" "+starty+" "+endx+" "+endy+" "+mapx+" "+mapy);
+        if(startx==endx && starty==endy) return new ArrayList<String>();
 
         if(map==null) return null;
 
@@ -165,7 +165,6 @@ public class NavigatorArchitecture extends AgArch {
         }
 
         if(cameFrom[endx][endy] == null) {
-            System.out.println("Did not find path.");
             return null;
         }
 
@@ -201,7 +200,7 @@ public class NavigatorArchitecture extends AgArch {
 
         Collections.reverse(path);
 
-        System.out.println("A* result: From:"+startx+","+starty+" To: "+endx+","+endy+"Path:"+path);
+        System.out.println("A* result: From:"+startx+","+starty+" To: "+endx+","+endy+" Path:"+path);
         
         return path;
     }
@@ -222,11 +221,8 @@ public class NavigatorArchitecture extends AgArch {
             while (im.hasNext()) {
                 Message m = (Message) im.next();
                 if (m.getSender().equals("valet")) {
-                    System.out.println("navigator valet message: "+m.toString()+" "+m.getPropCont());
                 
                     String route = m.getPropCont().toString();
-                    
-                    System.out.println(route);
 
                     Matcher mr = Pattern.compile("route\\(([0-9]*),([0-9]*),([0-9]*),([0-9]*)\\)").matcher(route);
                     mr.find();

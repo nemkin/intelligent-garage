@@ -38,7 +38,7 @@ public class GarageEnvironment extends Environment {
 
 
     int mapx, mapy;
-    private Field[][]  map;
+    public Field[][]  map;
     private List<Car> cars;
 
     public GarageEnvironment() {

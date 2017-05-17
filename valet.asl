@@ -31,8 +31,4 @@
 <-
 !route(X).
 
-+!route([H|T]): H == "U" <- up; !route(T). 
-+!route([H|T]): H == "D" <- down; !route(T). 
-+!route([H|T]): H == "L" <- left; !route(T). 
-+!route([H|T]): H == "R" <- right; !route(T).
-+!route([H|T]): true <- print("Cant do ", H); !route(T).
++!route([H|T]): true <- do(H); !route(T). 

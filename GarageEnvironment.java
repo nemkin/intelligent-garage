@@ -31,6 +31,12 @@ public class GarageEnvironment extends Environment {
     private String mapPath = "map.txt";
     private String carsPath = "cars.txt";
 
+    private Term up    = DefaultTerm.parse("do(up)");
+    private Term down  = DefaultTerm.parse("do(down)");
+    private Term right = DefaultTerm.parse("do(right)");
+    private Term left  = DefaultTerm.parse("do(left)");
+
+
     int mapx, mapy;
     private Field[][]  map;
     private List<Car> cars;
@@ -195,18 +201,17 @@ loop: for(int i=0; i<mapx; ++i) {
 
     @Override
         public boolean executeAction(String agName, Structure action) {
-            if(agName.equals("valet") && (action.equals("up") || action.equals("down") || action.equals("left") || action.equals("right"))) {
+            if(agName.equals("valet") && (action.equals(up) || action.equals(down) || action.equals(left) || action.equals(right))) {
                 System.out.println("Action! " + agName + " " +action);
                 Coord valetpos = findValet();
                 Coord valetnewpos;
-                switch(action.toString()) {
-                    case "left": valetnewpos = new Coord(valetpos.x, valetpos.y-1); break;
-                    case "right": valetnewpos = new Coord(valetpos.x, valetpos.y+1); break;
-                    case "up": valetnewpos = new Coord(valetpos.x-1, valetpos.y); break;
-                    case "down": valetnewpos = new Coord(valetpos.x+1, valetpos.y); break;
-                    default: valetnewpos = valetpos;
-                }
-
+                
+                if(action.equals(up))         valetnewpos = new Coord(valetpos.x-1, valetpos.y);
+                else if(action.equals(down))  valetnewpos = new Coord(valetpos.x+1, valetpos.y);
+                else if(action.equals(left))  valetnewpos = new Coord(valetpos.x, valetpos.y-1);
+                else if(action.equals(right)) valetnewpos = new Coord(valetpos.x, valetpos.y+1);
+                else valetnewpos = valetpos;
+                
                 if(steppable(valetnewpos)) {
                     map[valetpos.x][valetpos.y].agent = null;
                     map[valetnewpos.x][valetnewpos.y].agent = "valet";
@@ -214,9 +219,11 @@ loop: for(int i=0; i<mapx; ++i) {
                     //informAgsEnvironmentChanged();
                     return true;
                 } else {
+                    System.out.println("Not steppable "+valetnewpos);
                     return false;
                 }
             }
+            System.out.println(action.toString());
             return false;
         }
 

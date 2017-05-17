@@ -11,6 +11,11 @@ public class NavigatorArchitecture extends AgArch {
     int mapy;
     boolean[][] map;
 
+    static String up = "up";
+    static String down = "down";
+    static String left = "left";
+    static String right = "right";
+ 
     @Override
         public Collection<Literal> perceive() {
             Collection<Literal> perceptCollection = super.perceive();
@@ -177,22 +182,22 @@ public class NavigatorArchitecture extends AgArch {
 
             //Left
             if(from.y - 1 == curr.y) {
-                path.add("L");
+                path.add(left);
             }
 
             //Right
             if(from.y + 1 == curr.y) {
-                path.add("R");
+                path.add(right);
             }
 
             //Up
             if(from.x - 1 == curr.x) {
-                path.add("U");
+                path.add(up);
             }
 
             //Down
             if(from.x + 1 == curr.x) {
-                path.add("D");
+                path.add(down);
             }
 
             curr = from;

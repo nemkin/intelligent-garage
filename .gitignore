@@ -1,8 +1,9 @@
-JEdit saves
+# JEdit saves #
 *~
 
-build.xml
+# Java Build #
 *.class
+build.xml
 
 # Package Files #
 *.jar

@@ -44,14 +44,11 @@ public class GarageView extends GridWorldView {
                 drawString(g, x, y, defaultFont, "G");  
                 break;
         }
-
-        repaint();
     }
 
     @Override
     public void drawAgent(Graphics g, int x, int y, Color c, int id) {
             g.setColor(Color.yellow);
             super.drawString(g, x, y, defaultFont, "Valet");
-            repaint();
     }
 }

@@ -38,7 +38,7 @@ public class GarageEnvironment extends Environment {
     @Override
         public void init(String[] args) {
             super.init(args);
-            
+
             try {
 
                 BufferedReader mapFile = new BufferedReader(new FileReader(GarageModel.mapPath));
@@ -104,7 +104,7 @@ public class GarageEnvironment extends Environment {
         try {
 
             addPercept("navigator", ASSyntax.parseLiteral("dimension("+model.getWidth()+","+model.getHeight()+")"));
-            
+
             Location valetLoc = model.getAgPos(0);
             addPercept("valet", ASSyntax.parseLiteral("position("+valetLoc.x+","+valetLoc.y+")"));
 
@@ -152,13 +152,21 @@ public class GarageEnvironment extends Environment {
 
     @Override
         public boolean executeAction(String agName, Structure action) {
-            if(agName.equals("valet")) {
-                if(action.equals(up)) return model.moveAgentUp(0);
-                if(action.equals(down)) return model.moveAgentDown(0);
-                if(action.equals(left)) return model.moveAgentLeft(0);
-                if(action.equals(right)) return model.moveAgentRight(0);
+            try {
+                Thread.sleep(100);
+                if(agName.equals("valet")) {
+                    if(action.equals(up)) return model.moveAgentUp(0);
+                    if(action.equals(down)) return model.moveAgentDown(0);
+                    if(action.equals(left)) return model.moveAgentLeft(0);
+                    if(action.equals(right)) return model.moveAgentRight(0);
+
+                    return super.executeAction(agName, action);
+                }
+            } catch (InterruptedException e) {
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            return super.executeAction(agName, action);
+            return false;
         }
 }
 

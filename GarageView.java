@@ -1,62 +1,57 @@
-//import jason.environment.grid.GridWorldModel;
+import jason.environment.grid.*;
 
-import java.awt.GridLayout;
-import java.util.concurrent.TimeUnit;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
 
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.SwingUtilities;
+    
+public class GarageView extends GridWorldView {
 
+    GarageModel model;
+   
+    public GarageView(GarageModel model) {
+        super(model, "Domestic Robot", 700);
+        this.model = model;
+        defaultFont = new Font("Arial", Font.BOLD, 16); // change default font
+        setVisible(true);
+        repaint();
+    }
 
+    //Built in
+    //public static final int CLEAN = 0;
+    //public static final int AGENT = 2;
+    //public static final int OBSTACLE = 4;
+    public static final int PARKINGSPOT = 8;
+    public static final int CAR = 16;
+    public static final int GATE = 32;
 
-public class GarageView {
+    @Override
+    public void draw(Graphics g, int x, int y, int object) {
+        switch (object) {
 
-	  public static void main(String[] args) throws InterruptedException {
-		//GarageEnvironment garageEnv = new GarageEnvironment();
-		
-	   
-        JFrame frame = new JFrame("Intelligent Garage");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        // set the size of the frame
-        frame.setSize(450, 550);
+            case GarageModel.PARKINGSPOT: 
+                g.setColor(Color.black);
+                drawString(g, x, y, defaultFont, "P");  
+                break;
 
-        
-		// set the rows and cols of the grid, as well the distances between them
-        GridLayout grid = new GridLayout(9, 11, 0, 0);
-        // what layout we want to use for our frame
-        frame.setLayout(grid);
-        
-        //Mapos
-        /*for(int i=0;i<garageEnv.mapx;i++){
-        	for(int j=0;j<garageEnv.mapy;j++){
-        		JLabel label = new JLabel(garageEnv.map[i][j]);
-        		label.setHorizontalAlignment(JLabel.CENTER);
-        		frame.add(label);
-        	}
-        }*/
-        
-        for(int i=0;i<9*11;i++){
-        	JLabel label = new JLabel("1");
-        	label.setHorizontalAlignment(JLabel.CENTER);
-        	frame.add(label);
+            case GarageModel.CAR:
+                g.setColor(Color.red);
+                drawString(g, x, y, defaultFont, "C");  
+                break;
+            
+            case GarageModel.GATE:
+                g.setColor(Color.red);
+                drawString(g, x, y, defaultFont, "G");  
+                break;
         }
-        //System.out.println(frame.getComponentAt(5, 5));
-        
-		frame.setVisible(true);
-		//TimeUnit.SECONDS.sleep(3);
-		frame.removeAll();
-		//frame.revalidate();
-		//frame.repaint();
-		
-		frame.setVisible(false);
-		
-		for(int i=0;i<9*11;i++){
-        	JLabel label = new JLabel("2");
-        	label.setHorizontalAlignment(JLabel.CENTER);
-        	
-        	//label.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        	frame.add(label);
-        }
-		frame.setVisible(true);
+
+        repaint();
+    }
+
+    @Override
+    public void drawAgent(Graphics g, int x, int y, Color c, int id) {
+            g.setColor(Color.yellow);
+            super.drawString(g, x, y, defaultFont, "Valet");
+            repaint();
     }
 }

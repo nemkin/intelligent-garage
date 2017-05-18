@@ -8,9 +8,9 @@ import jason.asSyntax.*;
 import jason.environment.*;
 import jason.asSyntax.parser.*;
 
-public class GarageEnvironment extends Environment {
+import jason.environment.grid.Location;
 
-    private Logger logger = Logger.getLogger("Garage.mas2j."+GarageEnvironment.class.getName());
+public class GarageEnvironment extends Environment {
 
     private Timer eventTimer;
     public class EventTimer extends TimerTask {
@@ -28,79 +28,37 @@ public class GarageEnvironment extends Environment {
             }
     }
 
-    private String mapPath = "map.txt";
-    private String carsPath = "cars.txt";
+    GarageModel model;
 
     private Term up    = DefaultTerm.parse("do(up)");
     private Term down  = DefaultTerm.parse("do(down)");
     private Term right = DefaultTerm.parse("do(right)");
     private Term left  = DefaultTerm.parse("do(left)");
 
-
-    int mapx, mapy;
-    public Field[][]  map;
-    private List<Car> cars;
-
-    public GarageEnvironment() {
-
-        super();
-
-        try {
-
-            BufferedReader mapFile = new BufferedReader(new FileReader(mapPath));
-
-            String[] dim = mapFile.readLine().split(" ");
-            mapx = Integer.parseInt(dim[0]);
-            mapy = Integer.parseInt(dim[1]);
-
-            map = new Field[mapx][mapy];    
-
-            for(int i=0; i<mapx; ++i) {
-
-                String line = mapFile.readLine();
-
-                for(int j=0; j<mapy; ++j) {
-                    map[i][j] = new Field();
-                    switch(line.charAt(j)) {
-                        case '-': map[i][j].type = Field.Type.Road; break;
-                        case 'W': map[i][j].type = Field.Type.Wall; break;
-                        case 'E': map[i][j].type = Field.Type.ParkingSpot; break;
-                        case 'G': map[i][j].type = Field.Type.Gate; break;
-                    }
-                }
-            }
-            mapFile.close(); 
-
-            BufferedReader carsFile = new BufferedReader(new FileReader(carsPath));
-
-            cars = new ArrayList<>();
-
-            String line;
-            while((line = carsFile.readLine()) != null) {
-                String[] carData = line.split(";");
-                Car car = new Car(carData[0], carData[1]);
-                cars.add(car);
-            }
-
-
-            // Placing valet
-loop: for(int i=0; i<mapx; ++i) {
-          for(int j=0; j<mapy; ++j) {
-              if(map[i][j].type == Field.Type.Gate) {
-                  map[i][j].agent = "valet";
-                  break loop;
-              }
-          }
-      }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     @Override
         public void init(String[] args) {
             super.init(args);
+            
+            try {
+
+                BufferedReader mapFile = new BufferedReader(new FileReader(GarageModel.mapPath));
+
+                String[] dim = mapFile.readLine().split(" ");
+                int mapx = Integer.parseInt(dim[0]);
+                int mapy = Integer.parseInt(dim[1]);
+
+                model = new GarageModel(mapx, mapy);
+
+                mapFile.close();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            if(args.length>=1 && args[0].equals("gui")) {
+                GarageView view = new GarageView(model);
+                model.setView(view);
+            }
             updatePercepts();
 
             eventTimer = new Timer();
@@ -117,22 +75,20 @@ loop: for(int i=0; i<mapx; ++i) {
 
         Random rand = new Random();
 
-        for(int i=0; i<mapx; ++i) {
-            for(int j=0; j<mapy; ++j) {
+        for(int i=0; i<model.getWidth(); ++i) {
+            for(int j=0; j<model.getHeight(); ++j) {
 
                 // Car can arrive here.
-                if((i==2 && j==1 && map[i][j].car==null) || (map[i][j].type == Field.Type.Gate && map[i][j].car==null)) {
+                if(model.hasObject(model.GATE, i,j) && (model.getCarAt(i,j) == null)) {
                     if(rand.nextInt(100) < 250) {
-                        int index = rand.nextInt(cars.size());
-                        map[i][j].car = cars.get(index);
-                        cars.remove(index);
+                        model.generateCar(i,j);
                     } 
                 }
 
                 // Car can leave here.
-                if(map[i][j].type == Field.Type.ParkingSpot && map[i][j].car!=null && map[i][j].car.leaving==false) {
+                if(model.hasObject(model.PARKINGSPOT,i,j)  && (model.getCarAt(i,j)!=null)) {
                     if(rand.nextInt(100) < 50) {
-                        map[i][j].car.leaving = true;
+                        model.getCarAt(i,j).leaving = true;
                     }
                 }
             }
@@ -145,44 +101,39 @@ loop: for(int i=0; i<mapx; ++i) {
 
         deletePercepts();
 
-
         try {
 
-            addPercept("navigator", ASSyntax.parseLiteral("dimension("+mapx+","+mapy+")"));
+            addPercept("navigator", ASSyntax.parseLiteral("dimension("+model.getWidth()+","+model.getHeight()+")"));
+            
+            Location valetLoc = model.getAgPos(0);
+            addPercept("valet", ASSyntax.parseLiteral("position("+valetLoc.x+","+valetLoc.y+")"));
 
-            for(int i=0; i<mapx; ++i) {
-                for(int j=0; j<mapy; ++j) {
+            for(int i=0; i<model.getWidth(); ++i) {
+                for(int j=0; j<model.getHeight(); ++j) {
 
-                    if(map[i][j].obstacle()) {
-                        addPercept("navigator", ASSyntax.parseLiteral("obstacle("+i+","+j+")"));
-                    } else {
+                    if(model.isFree(i,j)) {
                         addPercept("navigator", ASSyntax.parseLiteral("~obstacle("+i+","+j+")"));
+                    } else {
+                        addPercept("navigator", ASSyntax.parseLiteral("obstacle("+i+","+j+")"));
                     }
 
-                    if(map[i][j].type == Field.Type.ParkingSpot && map[i][j].car!=null) {
+                    if(model.hasObject(model.PARKINGSPOT,i,j) && model.hasObject(model.CAR,i,i)) {
                         addPercept("surveillance", ASSyntax.parseLiteral("takenparkingspot("+i+","+j+")"));
+                        if(model.getCarAt(i,j).leaving) {
+                            addPercept("surveillance", ASSyntax.parseLiteral("carLeaving("+i+","+j+")"));
+                        }
                     }
 
-                    if(map[i][j].type == Field.Type.ParkingSpot && map[i][j].car == null) {
+                    if(model.hasObject(model.PARKINGSPOT,i,j) && !(model.hasObject(model.CAR,i,j))) {
                         addPercept("surveillance", ASSyntax.parseLiteral("emptyparkingspot("+i+","+j+")"));
                     }
 
-                    if(map[i][j].type == Field.Type.Gate) {
+                    if(model.hasObject(model.GATE,i,j)) {
                         addPercept("surveillance", ASSyntax.parseLiteral("gate("+i+","+j+")"));
+                        if(!(model.getCarAt(i,j)!=null && model.getCarAt(i,j).leaving)) {
+                            addPercept("surveillance", ASSyntax.parseLiteral("carArrived("+i+","+j+")"));
+                        }
                     }
-
-                    if(map[i][j].type == Field.Type.Gate && map[i][j].car != null) {
-                        addPercept("surveillance", ASSyntax.parseLiteral("carArrived("+i+","+j+")"));
-                    }
-
-                    if(map[i][j].car != null && map[i][j].car.leaving) {
-                        addPercept("surveillance", ASSyntax.parseLiteral("carLeaving("+i+","+j+")"));
-                    }
-
-                    if(map[i][j].agent != null && map[i][j].agent.equals("valet")) {
-                        addPercept("valet", ASSyntax.parseLiteral("position("+i+","+j+")"));
-                    }
-
                 }
             }
 
@@ -201,46 +152,14 @@ loop: for(int i=0; i<mapx; ++i) {
 
     @Override
         public boolean executeAction(String agName, Structure action) {
-            if(agName.equals("valet") && (action.equals(up) || action.equals(down) || action.equals(left) || action.equals(right))) {
-                System.out.println("Action! " + agName + " " +action);
-                Coord valetpos = findValet();
-                Coord valetnewpos;
-                
-                if(action.equals(up))         valetnewpos = new Coord(valetpos.x-1, valetpos.y);
-                else if(action.equals(down))  valetnewpos = new Coord(valetpos.x+1, valetpos.y);
-                else if(action.equals(left))  valetnewpos = new Coord(valetpos.x, valetpos.y-1);
-                else if(action.equals(right)) valetnewpos = new Coord(valetpos.x, valetpos.y+1);
-                else valetnewpos = valetpos;
-                
-                if(steppable(valetnewpos)) {
-                    map[valetpos.x][valetpos.y].agent = null;
-                    map[valetnewpos.x][valetnewpos.y].agent = "valet";
-                    updatePercepts();
-                    //informAgsEnvironmentChanged();
-                    return true;
-                } else {
-                    System.out.println("Not steppable "+valetnewpos);
-                    return false;
-                }
+            if(agName.equals("valet")) {
+                if(action.equals(up)) return model.moveAgentUp(0);
+                if(action.equals(down)) return model.moveAgentDown(0);
+                if(action.equals(left)) return model.moveAgentLeft(0);
+                if(action.equals(right)) return model.moveAgentRight(0);
             }
-            System.out.println(action.toString());
-            return false;
+            return super.executeAction(agName, action);
         }
-
-    private Coord findValet() {
-        for(int i=0; i<mapx; ++i) {
-            for(int j=0; j<mapy; ++j) {
-                if(map[i][j].agent!=null && map[i][j].agent.equals("valet")) {
-                    return new Coord(i,j);
-                }
-            }
-        }
-        return new Coord(-1,-1);
-    }
-
-    private boolean steppable(Coord c) {
-      return (0<=c.x && c.x<mapx && 0<=c.y && c.y<mapy && !(map[c.x][c.y].obstacle()));
-    }
 }
 
 

@@ -4,7 +4,7 @@ MAS garage {
 
     infrastructure: Centralised
 
-    environment: GarageEnvironment
+    environment: GarageEnvironment(gui)
 
     agents:
         navigator agentArchClass NavigatorArchitecture agentClass Navigator;

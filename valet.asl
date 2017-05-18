@@ -27,8 +27,9 @@
 !getRoute(A,B,X,Y);
 !getRoute(X,Y,U,V).
 
-+msg(X)[source(A)] : X\==[]
++msg(X)[source(A)] : X\==[] & A==navigator
 <-
 !route(X).
 
-+!route([H|T]): true <- do(H); !route(T). 
++!route([H|T]): true <- do(H); !route(T).
++!route(T) : T==[] <- .print("Arrived!"). 

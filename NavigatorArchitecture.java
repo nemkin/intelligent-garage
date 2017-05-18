@@ -20,7 +20,7 @@ public class NavigatorArchitecture extends AgArch {
         public Collection<Literal> perceive() {
             Collection<Literal> perceptCollection = super.perceive();
             parsePercepts(perceptCollection);
-            //printPercepts();
+            printPercepts();
             return perceptCollection;
         }
 

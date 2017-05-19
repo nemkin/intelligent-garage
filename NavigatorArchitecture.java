@@ -116,14 +116,11 @@ public class NavigatorArchitecture extends AgArch {
 
         while(curr.x!=endx || curr.y!=endy) {
 
-            System.out.println("A* expanding "+curr.x+" "+curr.y+" coming from "+cameFrom[curr.x][curr.y].x+" "+cameFrom[curr.x][curr.y].y);
-    
             closed[curr.x][curr.y] = true; 
 
             Coord left = new Coord(curr.x, curr.y-1); 
             if(steppable(left) || (left.x == endx && left.y == endy) ) {
                 if((g[curr.x][curr.y] + 1) < g[left.x][left.y] || (g[left.x][left.y] == -1)) {
-                    System.out.println("Left expansion to "+left.x+" "+left.y);
                     g[left.x][left.y] = g[curr.x][curr.y] + 1;
                     f[left.x][left.y] = g[left.x][left.y] + manhattan(left.x, left.y, endx, endy);
                     cameFrom[left.x][left.y] = curr;
@@ -133,7 +130,6 @@ public class NavigatorArchitecture extends AgArch {
             Coord right = new Coord(curr.x, curr.y+1);
             if(steppable(right) || (right.x == endx && right.y == endy)) {
                 if((g[curr.x][curr.y] + 1) < g[right.x][right.y] || (g[right.x][right.y] == -1)) {
-                    System.out.println("Right expansion to "+right.x+" "+right.y);
                     g[right.x][right.y] = g[curr.x][curr.y] + 1;
                     f[right.x][right.y] = g[right.x][right.y] + manhattan(right.x, right.y, endx, endy);
                     cameFrom[right.x][right.y] = curr;
@@ -143,7 +139,6 @@ public class NavigatorArchitecture extends AgArch {
             Coord up = new Coord(curr.x-1, curr.y);
             if(steppable(up) || (up.x == endx && up.y == endy)) {
                 if((g[curr.x][curr.y] + 1) < g[up.x][up.y] || (g[up.x][up.y] == -1)) {
-                    System.out.println("Up expansion to "+up.x+" "+up.y);
                     g[up.x][up.y] = g[curr.x][curr.y] + 1;
                     f[up.x][up.y] = g[up.x][up.y] + manhattan(up.x, up.y, endx, endy);
                     cameFrom[up.x][up.y] = curr;
@@ -153,7 +148,6 @@ public class NavigatorArchitecture extends AgArch {
             Coord down = new Coord(curr.x+1, curr.y);
             if(steppable(down) || (down.x == endx && down.y == endy)) {
                 if((g[curr.x][curr.y] + 1) < g[down.x][down.y] || (g[down.x][down.y] == -1)) {
-                    System.out.println("Down expansion "+down.x+" "+down.y);
                     g[down.x][down.y] = g[curr.x][curr.y] + 1;
                     f[down.x][down.y] = g[down.x][down.y] + manhattan(down.x, down.y, endx, endy);
                     cameFrom[down.x][down.y] = curr;
@@ -186,13 +180,9 @@ public class NavigatorArchitecture extends AgArch {
 
         curr = new Coord(endx,endy);
 
-        System.out.println("Path completion:");
 
         while(curr.x != startx || curr.y != starty) {
             from = cameFrom[curr.x][curr.y];
-
-            System.out.println("From "+from.x+" "+from.y+" To: "+curr.x+" "+curr.y);
-            
 
             //Left
             if(from.y - 1 == curr.y) {
@@ -219,7 +209,7 @@ public class NavigatorArchitecture extends AgArch {
 
         Collections.reverse(path);
 
-        System.out.println("A* result: From:"+startx+","+starty+" To: "+endx+","+endy+" Path:"+path);
+        System.out.println("[navigator] A* has been completed! From: ("+startx+","+starty+") To: ("+endx+","+endy+") I have calculated the following path: "+path);
         
         return path;
     }
@@ -243,19 +233,20 @@ public class NavigatorArchitecture extends AgArch {
                 
                     String route = m.getPropCont().toString();
 
-                    Matcher mr = Pattern.compile("route\\(([0-9]*),([0-9]*),([0-9]*),([0-9]*)\\)").matcher(route);
+                    Matcher mr = Pattern.compile("route([a-zA-Z]*)\\(([0-9]*),([0-9]*),([0-9]*),([0-9]*)\\)").matcher(route);
                     mr.find();
 
-                    List<String> path = astar(Integer.parseInt(mr.group(1)),
-                                              Integer.parseInt(mr.group(2)),
+                    List<String> path = astar(Integer.parseInt(mr.group(2)),
                                               Integer.parseInt(mr.group(3)),
-                                              Integer.parseInt(mr.group(4)));
-                    String result = "["+String.join(",", path)+"]"; 
+                                              Integer.parseInt(mr.group(4)),
+                                              Integer.parseInt(mr.group(5)));
+                    String result = "route"+mr.group(1)+"(["+String.join(",", path)+"])"; 
+                    //System.out.println("RESULT : "+result);
                     Message r = new Message(
                             "tell",
                             getAgName(),
                             m.getSender(),
-                            "msg("+result+")"
+                            result
                             );
                     
                     try {

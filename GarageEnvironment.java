@@ -12,22 +12,6 @@ import jason.environment.grid.Location;
 
 public class GarageEnvironment extends Environment {
 
-    private Timer eventTimer;
-    public class EventTimer extends TimerTask {
-
-        private GarageEnvironment env;
-
-        public EventTimer(GarageEnvironment env) {
-            super();
-            this.env = env;
-        }
-
-        @Override
-            public void run() {
-                env.randomizeEvents();
-            }
-    }
-
     GarageModel model;
 
     private Term up    = DefaultTerm.parse("go(up)");
@@ -50,6 +34,7 @@ public class GarageEnvironment extends Environment {
                 int mapy = Integer.parseInt(dim[1]);
 
                 model = new GarageModel(mapx, mapy);
+                model.setEnvironment(this);
 
                 mapFile.close();
 
@@ -58,13 +43,12 @@ public class GarageEnvironment extends Environment {
             }
 
             if(args.length>=1 && args[0].equals("gui")) {
-                GarageView view = new GarageView(model);
+                GarageView view = new GarageView(model, this);
                 model.setView(view);
             }
+
             updatePercepts();
 
-            eventTimer = new Timer();
-            eventTimer.schedule(new EventTimer(this), 0, 500);
         }
 
     @Override
@@ -73,33 +57,7 @@ public class GarageEnvironment extends Environment {
             super.stop();
         }
 
-    public void randomizeEvents() {
-
-        Random rand = new Random();
-
-        for(int i=0; i<model.getWidth(); ++i) {
-            for(int j=0; j<model.getHeight(); ++j) {
-
-                // Car can arrive here.
-                if(model.hasObject(model.GATE, i,j) && (model.getCarAt(i,j) == null)) {
-                    if(rand.nextInt(100) < 250) {
-                        model.generateCar(i,j);
-                    } 
-                }
-
-                // Car can leave here.
-                if(model.hasObject(model.PARKINGSPOT,i,j)  && (model.getCarAt(i,j)!=null)) {
-                    if(rand.nextInt(100) < 50) {
-                        model.getCarAt(i,j).leaving = true;
-                    }
-                }
-            }
-        }
-
-        updatePercepts();
-    }
-
-    private void updatePercepts() {
+    public void updatePercepts() {
 
         deletePercepts();
 
@@ -113,7 +71,7 @@ public class GarageEnvironment extends Environment {
             for(int i=0; i<model.getWidth(); ++i) {
                 for(int j=0; j<model.getHeight(); ++j) {
 
-                    if(model.isFree(i,j)) {
+                    if(model.isFree(i,j) && !(model.hasObject(model.PARKINGSPOT,i,j))) {
                         addPercept("navigator", ASSyntax.parseLiteral("~obstacle("+i+","+j+")"));
                     } else {
                         addPercept("navigator", ASSyntax.parseLiteral("obstacle("+i+","+j+")"));
@@ -132,14 +90,15 @@ public class GarageEnvironment extends Environment {
 
                     if(model.hasObject(model.GATE,i,j)) {
                         addPercept("surveillance", ASSyntax.parseLiteral("gate("+i+","+j+")"));
-                        if(model.getCarAt(i,j)!=null && !(model.getCarAt(i,j).leaving)) {
+                        if((model.getCarAt(i,j)!=null) && (model.getCarAt(i,j).leaving==false)) {
                             addPercept("surveillance", ASSyntax.parseLiteral("carArrived("+i+","+j+")"));
                         }
                     }
                     if(model.carCarriedByAgent!=null) {
-                        addPercept("valet", ASSyntax.parseLiteral("car"));
+                        String percept = "car("+model.carCarriedByAgent.toString()+")";
+                        addPercept("valet", ASSyntax.parseLiteral(percept));
                     } else {
-                        addPercept("valet", ASSyntax.parseLiteral("~car"));
+                        addPercept("valet", ASSyntax.parseLiteral("nocar"));
                     }
                 }
             }

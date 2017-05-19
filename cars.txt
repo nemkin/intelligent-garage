@@ -1,30 +1,30 @@
-Halász Alexandra;NSH-374
-Kocsis Miklós;AWU-634
-Szekér Dávid;EWE-233
-Kovács Mátyás;IDC-143
-Vajda Endre;COW-914
-Takács Linda;BOL-941
-Havas Éva;FEI-927
-Soltész Péter;HAJ-741
-Pál Blanka;IAH-963
-Gáspár Anna;HIX-861
-Tóth Zsuzsanna;NOX-198
-Kovács Árpád;HNL-011
-Kiss Norbert;KFR-745
-Vadász Tímea;HPS-469
-Szabó Barnabás;MOS-800
-Mayer Mónika;SAP-013
-Kecskés Zoltán;IGE-321
-Bíró Hedvig;NEM-020
-Nagy Gergely;NOP-656
-Fóti Tünde;LSD-999
-Vadász Péter;KAC-276
-Szatmári Borbála;CAT-455
-Veres Bence;CIB-195
-Harangozó Erzsébet;LAC-731
-Tiszafalvi Sándor;ALM-519
-Herman Nikolett;BPO-612
-Sass János;DNS-276
-Németh Edina;EXE-383
-Jávorka Béla;FTC-571
-Szénási Ágnes;KFC-771
+Halasz_Alexandra;NSH_374
+Kocsis_Miklos;AWU_634
+Szeker_David;EWE_233
+Kovacs_Matyas;IDC_143
+Vajda_Endre;COW_914
+Takacs_Linda;BOL_941
+Havas_Eva;FEI_927
+Soltesz_Peter;HAJ_741
+Pal_Blanka;IAH_963
+Gaspar_Anna;HIX_861
+Toth_Zsuzsanna;NOX_198
+Kovacs_Arpad;HNL_011
+Kiss_Norbert;KFR_745
+Vadasz_Timea;HPS_469
+Szabo_Barnabas;MOS_800
+Mayer_Monika;SAP_013
+Kecskes_Zoltan;IGE_321
+Biro_Hedvig;NEM_020
+Nagy_Gergely;NOP_656
+Foti_Tunde;LSD_999
+Vadasz_Peter;KAC_276
+Szatmari_Borbala;CAT_455
+Veres_Bence;CIB_195
+Harangozo_Erzsebet;LAC_731
+Tiszafalvi_Sandor;ALM_519
+Herman_Nikolett;BPO_612
+Sass_Janos;DNS_276
+Nemeth_Edina;EXE_383
+Javorka_Bela;FTC_571
+Szenasi_Agnes;KFC_771

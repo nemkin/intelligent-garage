@@ -10,7 +10,7 @@
 
 +!start : true 
 <-
-.print("hello world").
+.print("Start up complete.").
 
 
 +gate(X,Y) : true
@@ -20,26 +20,31 @@
 
 +takenparkingspot(X,Y) : true
 <-
-.print("takenparkingspot ",X,",",Y).
+.print("A parking spot at (",X,",",Y,") has been filled.").
 
 
-+emptyparkingspot(X,Y) : true
-<-
-.print("emptyparkingspot ",X,",",Y).
+//+emptyparkingspot(X,Y) : true
+//<-
+//.print("emptyparkingspot ",X,",",Y).
 
 
 +carArrived(X,Y) : emptyparkingspot(U,V)
 <-
-.print("carArrived ",X,",",Y);
+.print("There is a car at (",X,",",Y,") waiting to be placed in the parking area. Calling valet...");
 !callValet(X,Y,U,V).
 
 
-+carLeaving(X,Y) : true
++carLeaving(X,Y) : gate(U,V)
 <-
-.print("carLeaving ",X,",",Y).
+.print("There is a car at (",X,",",Y,") waiting to get out of the parking area. Calling valet...");
+!callValet(X,Y,U,V).
 
 
 +!callValet(X,Y,U,V) : true 
 <- 
-.print("Calling valet to pick up the car from (",X,",",Y,") and carry it to the parking spot at (",U,",",V,")");
-.send(valet,achieve,goOnPosition(X,Y,U,V)).
+.print("Instructing valet to pick up the car from (",X,",",Y,") and carry it to (",U,",",V,").");
+.send(valet,achieve,carryCar(X,Y,U,V)).
+
++carOnValet(X,Y) : true
+<-
+.print("Valet is carrying car from owner ",X," with licence plate number ",Y).

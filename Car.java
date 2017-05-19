@@ -14,5 +14,9 @@ public class Car {
         this.leaving = false;
         this.location = null;	
 	}
+
+    public String toString() {
+        return "\""+owner+"\",\""+numberPlate+"\"";
+    }
 	
 }

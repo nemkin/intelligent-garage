@@ -20,7 +20,9 @@ public class GarageModel extends GridWorldModel {
 
     public List<Car> cars;
     
-    public Car carCarriedByAgent;
+    public Car carCarriedByAgent = null;
+
+    private GarageEnvironment environment;
 
     public GarageModel(int mapx, int mapy) {
         
@@ -79,6 +81,10 @@ loop:       for(int i=0; i<width; ++i) {
         }
     }
 
+    public void setEnvironment(GarageEnvironment environment) {
+        this.environment = environment;
+    }
+
     public boolean moveAgentUp(int agent) {
         return moveAgent(agent, -1, 0);
     }
@@ -104,19 +110,22 @@ loop:       for(int i=0; i<width; ++i) {
 
         setAgPos(agent, newAgLoc);
 
-        if(view!=null) {
-            //Repaint?
-        }
-
+        environment.updatePercepts();
+ 
         return true;
     }
 
     public boolean pickupAgentCar(int agent) {
         Location agLoc = getAgPos(agent);
+        System.out.println("[environment] Car is being picked up from ("+agLoc.x+","+agLoc.y+").");
         carCarriedByAgent = getCarAt(agLoc);
-        if(carCarriedByAgent==null) return false;
+        if(carCarriedByAgent==null) {
+                System.out.println("[environment] Could not find any cars to be picked up at ("+agLoc.x+","+agLoc.y+").");
+                return false;
+        }
         remove(CAR,carCarriedByAgent.location);
         carCarriedByAgent.location = null;
+        environment.updatePercepts(); 
         return true;
     }
 
@@ -130,6 +139,7 @@ loop:       for(int i=0; i<width; ++i) {
             add(CAR, carCarriedByAgent.location);
         }
         carCarriedByAgent = null;
+        environment.updatePercepts();
         return true;
     }
     
@@ -160,7 +170,7 @@ loop:       for(int i=0; i<width; ++i) {
     
     public Car getCarAt(Location location) {
         for(Car car : cars) {
-            if(car.location != null && car.location.equals(location)) {
+            if((car.location != null) && (car.location.x == location.x) && (car.location.y == location.y)) {
                return car; 
             }
         }
@@ -170,8 +180,11 @@ loop:       for(int i=0; i<width; ++i) {
     public boolean generateCar(int x, int y) {
         for(Car car : cars) {
             if(car.location == null) {
+                System.out.println("[environment] Generating arriving car at ("+x+","+y+")");
                 car.location = new Location(x,y);
+                car.leaving = false;
                 add(CAR,x,y);
+                environment.updatePercepts();
                 return true;
             }
         }

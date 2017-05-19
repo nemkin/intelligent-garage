@@ -252,7 +252,7 @@ public class NavigatorArchitecture extends AgArch {
                     try {
                         sendMsg(r);
                     } catch (Exception e) {
-                        e.printStackTrace(); //TODO
+                        e.printStackTrace();
                     }
                     im.remove(); //Feldolgoztuk
                 }

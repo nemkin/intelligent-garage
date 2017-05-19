@@ -7,8 +7,8 @@ MAS garage {
     environment: GarageEnvironment(gui)
 
     agents:
-        navigator agentArchClass NavigatorArchitecture agentClass Navigator;
-        surveillance agentArchClass SurveillanceArchitecture agentClass Surveillance;
-        valet agentArchClass ValetArchitecture agentClass Valet;
+        navigator agentArchClass NavigatorArchitecture;
+        surveillance;
+        valet;
 }
 

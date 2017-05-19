@@ -20,6 +20,8 @@ public class GarageModel extends GridWorldModel {
 
     public List<Car> cars;
     
+    public Car carCarriedByAgent;
+
     public GarageModel(int mapx, int mapy) {
         
         super(mapx, mapy, 1);    
@@ -109,6 +111,27 @@ loop:       for(int i=0; i<width; ++i) {
         return true;
     }
 
+    public boolean pickupAgentCar(int agent) {
+        Location agLoc = getAgPos(agent);
+        carCarriedByAgent = getCarAt(agLoc);
+        if(carCarriedByAgent==null) return false;
+        remove(CAR,carCarriedByAgent.location);
+        carCarriedByAgent.location = null;
+        return true;
+    }
+
+    public boolean dropAgentCar(int agent) {
+        if(carCarriedByAgent==null) return false;
+        Location agLoc = getAgPos(agent);
+        if(carCarriedByAgent.leaving && hasObject(GATE, agLoc)) {
+            carCarriedByAgent.leaving = false;
+        } else {
+            carCarriedByAgent.location = agLoc;
+            add(CAR, carCarriedByAgent.location);
+        }
+        carCarriedByAgent = null;
+        return true;
+    }
     
     public List<Car> incomingCars() {
         List<Car> ret = new ArrayList<>();
@@ -148,6 +171,7 @@ loop:       for(int i=0; i<width; ++i) {
         for(Car car : cars) {
             if(car.location == null) {
                 car.location = new Location(x,y);
+                add(CAR,x,y);
                 return true;
             }
         }

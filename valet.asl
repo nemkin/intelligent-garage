@@ -8,7 +8,7 @@
 
 /* Plans */
 
-+!start : true
++!start : position(A,B)
 <-
 .print("hello world").
 
@@ -27,9 +27,10 @@
 !getRoute(A,B,X,Y);
 !getRoute(X,Y,U,V).
 
-+msg(X)[source(A)] : X\==[] & A==navigator
++msg(X)[source(A)] : A==navigator
 <-
 !route(X).
 
-+!route([H|T]): true <- do(H); !route(T).
-+!route(T) : T==[] <- .print("Arrived!"). 
++!route([H|T]): true <- go(H); !route(T).
++!route(T) : T==[] & car <- dropcar; .print("Dropped car!"). 
++!route(T) : T==[] & ~car <- pickupcar; .print("Picked up car!"). 

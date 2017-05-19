@@ -30,10 +30,12 @@ public class GarageEnvironment extends Environment {
 
     GarageModel model;
 
-    private Term up    = DefaultTerm.parse("do(up)");
-    private Term down  = DefaultTerm.parse("do(down)");
-    private Term right = DefaultTerm.parse("do(right)");
-    private Term left  = DefaultTerm.parse("do(left)");
+    private Term up    = DefaultTerm.parse("go(up)");
+    private Term down  = DefaultTerm.parse("go(down)");
+    private Term right = DefaultTerm.parse("go(right)");
+    private Term left  = DefaultTerm.parse("go(left)");
+    private Term pickupcar = DefaultTerm.parse("pickupcar");
+    private Term dropcar = DefaultTerm.parse("dropcar");
 
     @Override
         public void init(String[] args) {
@@ -117,7 +119,7 @@ public class GarageEnvironment extends Environment {
                         addPercept("navigator", ASSyntax.parseLiteral("obstacle("+i+","+j+")"));
                     }
 
-                    if(model.hasObject(model.PARKINGSPOT,i,j) && model.hasObject(model.CAR,i,i)) {
+                    if(model.hasObject(model.PARKINGSPOT,i,j) && model.hasObject(model.CAR,i,j)) {
                         addPercept("surveillance", ASSyntax.parseLiteral("takenparkingspot("+i+","+j+")"));
                         if(model.getCarAt(i,j).leaving) {
                             addPercept("surveillance", ASSyntax.parseLiteral("carLeaving("+i+","+j+")"));
@@ -130,9 +132,14 @@ public class GarageEnvironment extends Environment {
 
                     if(model.hasObject(model.GATE,i,j)) {
                         addPercept("surveillance", ASSyntax.parseLiteral("gate("+i+","+j+")"));
-                        if(!(model.getCarAt(i,j)!=null && model.getCarAt(i,j).leaving)) {
+                        if(model.getCarAt(i,j)!=null && !(model.getCarAt(i,j).leaving)) {
                             addPercept("surveillance", ASSyntax.parseLiteral("carArrived("+i+","+j+")"));
                         }
+                    }
+                    if(model.carCarriedByAgent!=null) {
+                        addPercept("valet", ASSyntax.parseLiteral("car"));
+                    } else {
+                        addPercept("valet", ASSyntax.parseLiteral("~car"));
                     }
                 }
             }
@@ -159,7 +166,9 @@ public class GarageEnvironment extends Environment {
                     if(action.equals(down)) return model.moveAgentDown(0);
                     if(action.equals(left)) return model.moveAgentLeft(0);
                     if(action.equals(right)) return model.moveAgentRight(0);
-
+                    if(action.equals(dropcar)) return model.dropAgentCar(0);
+                    if(action.equals(pickupcar)) return model.pickupAgentCar(0);
+                    
                     return super.executeAction(agName, action);
                 }
             } catch (InterruptedException e) {

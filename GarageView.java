@@ -36,12 +36,16 @@ public class GarageView extends GridWorldView {
 
             case GarageModel.CAR:
                 g.setColor(Color.red);
-                drawString(g, x, y, defaultFont, "C");  
+                drawString(g, x, y, defaultFont, "CAR");  
                 break;
             
             case GarageModel.GATE:
                 g.setColor(Color.red);
                 drawString(g, x, y, defaultFont, "G");  
+                break;
+            
+            default:
+            
                 break;
         }
     }
